@@ -22,14 +22,14 @@ public:
     WebEvent(WebEventType type, std::string elementID, Rml::Element* element, const Rml::Dictionary& parameters);
     ~WebEvent();
 
-    bool exists();
-    WebEventType getType();
+    bool exists() const;
+    WebEventType getType() const;
     static std::string getTypeName(int webEvtType);
-    std::string getTypeName();
-    std::string toString();
-    std::string getElementID();
-    Rml::Element* getElement();
-    Rml::Dictionary getParameters();
+    std::string getTypeName() const;
+    std::string toString() const;
+    std::string getElementID() const;
+    Rml::Element* getElement() const;
+    Rml::Dictionary getParameters() const;
 
 private:
     WebEventType type = NONE;

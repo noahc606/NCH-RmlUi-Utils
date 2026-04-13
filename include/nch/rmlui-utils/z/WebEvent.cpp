@@ -25,10 +25,10 @@ WebEvent::WebEvent(WebEventType type, std::string elementID, Rml::Element* eleme
 }
 WebEvent::~WebEvent(){}
 
-bool WebEvent::exists() {
+bool WebEvent::exists() const {
     return type!=WebEventType::NONE;
 }
-WebEvent::WebEventType WebEvent::getType() {
+WebEvent::WebEventType WebEvent::getType() const {
     return type;
 }
 std::string WebEvent::getTypeName(int webEventType) {
@@ -38,10 +38,10 @@ std::string WebEvent::getTypeName(int webEventType) {
     }
     return "???null???";
 }
-std::string WebEvent::getTypeName() {
+std::string WebEvent::getTypeName() const {
     return getTypeName(type);
 }
-std::string WebEvent::toString()
+std::string WebEvent::toString() const
 {
     std::string verb = "???null???";
     auto itr = wetDescMap.find(type);
@@ -55,12 +55,12 @@ std::string WebEvent::toString()
     ret << verb << " element with ID \"" << elementID << "\"";
     return ret.str();
 }
-std::string WebEvent::getElementID() {
+std::string WebEvent::getElementID() const {
     return elementID;
 }
-Rml::Element* WebEvent::getElement() {
+Rml::Element* WebEvent::getElement() const {
     return element;
 }
-Rml::Dictionary WebEvent::getParameters() {
+Rml::Dictionary WebEvent::getParameters() const {
     return parameters;
 }

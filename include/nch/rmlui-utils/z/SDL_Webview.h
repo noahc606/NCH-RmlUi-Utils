@@ -58,8 +58,8 @@ public:
     void setUserCanScroll(bool ucs);
     void setReloadUsingF5(bool reloadUsingF5);
     void useAnimatedScrolling(bool use);
+    void processResizes(bool forcedTexRecreation = false);
 private:
-    void processResizes();
     void updateResizingBody();
     void truncateViewBox();
 

@@ -41,7 +41,7 @@ void InputSlider::tick(SDL_Webview* sdlWebview, Rml::Element* e)
     //Hovering?
     bool hovering = eBox.contains(mousePos.x, mousePos.y);
 
-    //If this slider hasn't been built yet, so do.
+    //If this slider hasn't been built yet, do so.
     if(!RmlUtils::elementHasAttribute(e, "z-slider-built")) {
         e->SetInnerRML("");
 
@@ -57,11 +57,14 @@ void InputSlider::tick(SDL_Webview* sdlWebview, Rml::Element* e)
     if(RmlUtils::elementHasAttribute(e, "z-slider-controllable")) {
         controllable = true;
     }
-    if(Input::mouseDownTime(1)==1 && hovering) {
-        controllable = true;
-    }
-    if(!Input::isMouseDown(1)) {
-        controllable = false;
+
+    if(Input::isInitialized()) {
+        if(Input::mouseDownTime(1)==1 && hovering) {
+            controllable = true;
+        }
+        if(!Input::isMouseDown(1)) {
+            controllable = false;
+        }
     }
 
     //Update attribute based on 'controllable'

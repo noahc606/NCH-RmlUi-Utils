@@ -132,12 +132,15 @@ bool SDL_Webview::rmlGlobalInit(GLSDL_Renderer* p_sdlRenderer, std::string p_sdl
 
     /* SDL renderer info */
 #ifdef NCH_GLSDL_OPENGL_BACKEND
-    SDL_GetRendererInfo(sdlRenderer->toSDL_Renderer(), &sdlRendererInfo);
+    int glMaxTextureSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glMaxTextureSize);
+    maxDimSize.x = glMaxTextureSize;
+    maxDimSize.y = glMaxTextureSize;
 #else
     SDL_GetRendererInfo(sdlRenderer, &sdlRendererInfo);
-#endif
     maxDimSize.x = sdlRendererInfo.max_texture_width;
     maxDimSize.y = sdlRendererInfo.max_texture_height;
+#endif
 
     rmlInitialized = true;
 
@@ -246,22 +249,6 @@ void SDL_Webview::tick()
         }
     }
 
-    /* Custom elements */
-    Rml::ElementList elist;
-    {
-        //Slider
-        workingDocument->GetElementsByTagName(elist, "slider");
-        for(int i = 0; i<elist.size(); i++) {
-            InputSlider::tick(this, elist[i]);
-        }
-        //Expanding textarea
-        workingDocument->GetElementsByTagName(elist, "textarea");
-        for(int i = 0; i<elist.size(); i++) {
-            InputTextareaEx::tick(this, elist[i]);
-        }
-    }
-
-
     /* Reloading */
     if(forcedFocus && reloadUsingF5 && Input::keyDownTime(SDLK_F5)==1) {
         reload();    
@@ -290,6 +277,22 @@ void SDL_Webview::tick()
 void SDL_Webview::update()
 {
     if(rmlContext==nullptr) return;
+    
+    /* Custom elements */
+    Rml::ElementList elist;
+    {
+        //Slider
+        workingDocument->GetElementsByTagName(elist, "slider");
+        for(int i = 0; i<elist.size(); i++) {
+            InputSlider::tick(this, elist[i]);
+        }
+        //Expanding textarea
+        workingDocument->GetElementsByTagName(elist, "textarea");
+        for(int i = 0; i<elist.size(); i++) {
+            InputTextareaEx::tick(this, elist[i]);
+        }
+    }
+
     rmlContext->Update();
 }
 void SDL_Webview::render()
@@ -497,8 +500,8 @@ void SDL_Webview::setScreenPos(Vec2i scrPos)
 }
 void SDL_Webview::setScreenDims(Vec2i scrDims)
 {
-    if(scrDims.x>dims.x) scrDims.x = dims.x;
-    if(scrDims.y>dims.y) scrDims.y = dims.y;
+    if(scrDims.x>requestedDims.x) scrDims.x = requestedDims.x;
+    if(scrDims.y>requestedDims.y) scrDims.y = requestedDims.y;
     screenBox.r.w = scrDims.x;
     screenBox.r.h = scrDims.y;
 }
@@ -596,20 +599,23 @@ bool SDL_Webview::hasForcedFocus() const {
     return forcedFocus;
 }
 
-void SDL_Webview::processResizes()
+void SDL_Webview::processResizes(bool forcedTexRecreation)
 {
-    if(Timer::getTicks()<lastResizeMS+100) {
-        return;
-    }
-    if(dims==requestedDims) return;
-    bool needRecreation = false;
-    if(requestedDims.x>maxDims.x) {
-        maxDims.x = requestedDims.x;
-        needRecreation = true;
-    }
-    if(requestedDims.y>maxDims.y) {
-        maxDims.y = requestedDims.y;
-        needRecreation = true;
+    bool needRecreation = true;
+    if(!forcedTexRecreation) {
+        needRecreation = false;
+        if(Timer::getTicks()<lastResizeMS+100) {
+            return;
+        }
+        if(dims==requestedDims) return;
+        if(requestedDims.x>maxDims.x) {
+            maxDims.x = requestedDims.x;
+            needRecreation = true;
+        }
+        if(requestedDims.y>maxDims.y) {
+            maxDims.y = requestedDims.y;
+            needRecreation = true;
+        }
     }
 
     //Resize variable(s)
