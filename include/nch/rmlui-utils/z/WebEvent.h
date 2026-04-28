@@ -20,6 +20,7 @@ public:
 
     WebEvent();
     WebEvent(WebEventType type, std::string elementID, Rml::Element* element, const Rml::Dictionary& parameters);
+    WebEvent(WebEventType type, std::string elementID, Rml::Element* element);
     ~WebEvent();
 
     bool exists() const;

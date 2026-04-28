@@ -23,6 +23,11 @@ WebEvent::WebEvent(WebEventType type, std::string elementID, Rml::Element* eleme
     WebEvent::element = element;
     WebEvent::parameters = parameters;
 }
+WebEvent::WebEvent(WebEventType type, std::string elementID, Rml::Element* element) {
+    WebEvent::type = type;
+    WebEvent::elementID = elementID;
+    WebEvent::element = element;
+}
 WebEvent::~WebEvent(){}
 
 bool WebEvent::exists() const {

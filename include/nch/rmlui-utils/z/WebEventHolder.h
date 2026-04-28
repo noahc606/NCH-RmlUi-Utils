@@ -26,6 +26,7 @@ public:
     ~WebEventHolder();
 
     void trackEvent(WebEvent::WebEventType webEvtType, Rml::Element* elem);
+    void injectEvent(const WebEvent& wEvt);
     WebEvent popEvent();
 
 private:

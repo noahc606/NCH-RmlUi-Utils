@@ -24,7 +24,9 @@ void WebEventHolder::trackEvent(WebEvent::WebEventType webEvtType, Rml::Element*
     }
     Log::warn(__PRETTY_FUNCTION__, "Invalid 'webEvtType' provided (%d)", webEvtType);
 }
-
+void WebEventHolder::injectEvent(const WebEvent& wEvt) {
+    webEvents->push(wEvt);
+}
 WebEvent WebEventHolder::popEvent()
 {
     //Return "NONE" event under certain conditions
