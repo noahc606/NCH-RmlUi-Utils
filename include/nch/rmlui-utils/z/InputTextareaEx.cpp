@@ -1,4 +1,5 @@
 #include "InputTextareaEx.h"
+#include <cmath>
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Elements/ElementFormControlTextArea.h>
 #include <nch/cpp-utils/string-utils.h>
@@ -23,6 +24,10 @@ void InputTextareaEx::tick(SDL_Webview* webview, Rml::Element* e) {
     if(!e->HasAttribute("z-textarea-ex-id")) {
         e->SetAttribute("z-textarea-ex-id", StringUtils::cat(numTextareasCreated));
         numTextareasCreated++;
+        //An expanding textarea always grows to fit its content, so RmlUi's internal vertical
+        //scrollbar is never needed. Left enabled and unstyled, a 1px height shortfall activates
+        //it at 100% width, which zeroes the client width and makes RmlUi lay out no text at all.
+        e->SetProperty("overflow-y", "hidden");
     }
     id = RmlUtils::getElementAttribute(e, "z-textarea-ex-id");
     val = efcta->GetValue();
@@ -84,7 +89,9 @@ int InputTextareaEx::getTextAreaIdealHeight(Rml::Element* eTextArea, Rml::Contex
     {
         ctx->Update();
         Rml::BoxArea boxArea = Rml::BoxArea::Margin;
-        int ret = eDummy->GetBox().GetSize(boxArea).y;
+        //Round up: line boxes have fractional heights (default line-height = 1.2*font-size), and
+        //truncating can size the textarea below one line, which the text widget treats as overflow.
+        int ret = (int)std::ceil(eDummy->GetBox().GetSize(boxArea).y);
         eParent->RemoveChild(eDummy);
         ctx->Update();
         return ret;

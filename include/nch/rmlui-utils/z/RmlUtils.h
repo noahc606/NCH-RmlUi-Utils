@@ -7,11 +7,17 @@
 
 namespace nch { class RmlUtils {
 public:
+    /// @param elem RmlUi element to find the rectangular bounding box of.
+    /// @param offset Extra offset to apply to the returned rect, usually screen pos of the owning webview.
+    /// @param boxArea Margin is biggest, then border, then padding, then content.
+    /// @return Rectangular bounding box of the given element w/ applied params.
     static nch::FRect getElementBox(Rml::Element* elem, Vec2f offset = {0, 0}, Rml::BoxArea boxArea = Rml::BoxArea::Border);
     static std::string getElementAttribute(Rml::Element* elem, std::string attrName);
     static bool elementHasAttribute(Rml::Element* elem, std::string attrName);
     static std::tuple<int, int, std::string> tryGetSelectedText(Rml::Element* elem);
-    
+    static std::string escapeSpecialChars(const std::string& raw);
+    static std::string unescapeSpecialChars(const std::string& rml);
+
     template<typename ... T> static void setStyleFormatted(Rml::Element* elem, const std::string& styleFormat, T ... args) {
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wformat-security"

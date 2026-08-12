@@ -47,6 +47,9 @@ public:
 
 	double GetElapsedTime() override;
 
+	//Retired: the cursor is owned by nch::RML_Cursor, which picks one cursor per tick from the
+	//topmost hovered webview. Per-context SDL_SetCursor calls from here fought each other and went
+	//stale whenever the webview that last set the cursor moved, hid, or was destroyed.
 	void SetMouseCursor(const Rml::String& cursor_name) override;
 
 	void SetClipboardText(const Rml::String& text) override;
@@ -57,14 +60,6 @@ public:
 
 private:
 	SDL_Window* window = nullptr;
-
-	SDL_Cursor* cursor_default = nullptr;
-	SDL_Cursor* cursor_move = nullptr;
-	SDL_Cursor* cursor_pointer = nullptr;
-	SDL_Cursor* cursor_resize = nullptr;
-	SDL_Cursor* cursor_cross = nullptr;
-	SDL_Cursor* cursor_text = nullptr;
-	SDL_Cursor* cursor_unavailable = nullptr;
 };
 
 namespace RmlSDL {

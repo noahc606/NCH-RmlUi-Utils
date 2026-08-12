@@ -32,33 +32,9 @@
 #include <RmlUi/Core/StringUtilities.h>
 #include <RmlUi/Core/SystemInterface.h>
 
-SystemInterface_SDL::SystemInterface_SDL()
-{
-	cursor_default = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-	cursor_move = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
-	cursor_pointer = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
-	cursor_resize = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
-	cursor_cross = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
-	cursor_text = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
-	cursor_unavailable = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
-}
+SystemInterface_SDL::SystemInterface_SDL() {}
 
-SystemInterface_SDL::~SystemInterface_SDL()
-{
-#if SDL_MAJOR_VERSION >= 3
-	auto DestroyCursor = [](SDL_Cursor* cursor) { SDL_DestroyCursor(cursor); };
-#else
-	auto DestroyCursor = [](SDL_Cursor* cursor) { SDL_FreeCursor(cursor); };
-#endif
-
-	DestroyCursor(cursor_default);
-	DestroyCursor(cursor_move);
-	DestroyCursor(cursor_pointer);
-	DestroyCursor(cursor_resize);
-	DestroyCursor(cursor_cross);
-	DestroyCursor(cursor_text);
-	DestroyCursor(cursor_unavailable);
-}
+SystemInterface_SDL::~SystemInterface_SDL() {}
 
 void SystemInterface_SDL::SetWindow(SDL_Window* in_window)
 {
@@ -72,29 +48,9 @@ double SystemInterface_SDL::GetElapsedTime()
 	return double(SDL_GetPerformanceCounter() - start) / frequency;
 }
 
-void SystemInterface_SDL::SetMouseCursor(const Rml::String& cursor_name)
+void SystemInterface_SDL::SetMouseCursor(const Rml::String& /*cursor_name*/)
 {
-	SDL_Cursor* cursor = nullptr;
-
-	if (cursor_name.empty() || cursor_name == "arrow")
-		cursor = cursor_default;
-	else if (cursor_name == "move")
-		cursor = cursor_move;
-	else if (cursor_name == "pointer")
-		cursor = cursor_pointer;
-	else if (cursor_name == "resize")
-		cursor = cursor_resize;
-	else if (cursor_name == "cross")
-		cursor = cursor_cross;
-	else if (cursor_name == "text")
-		cursor = cursor_text;
-	else if (cursor_name == "unavailable")
-		cursor = cursor_unavailable;
-	else if (Rml::StringUtilities::StartsWith(cursor_name, "rmlui-scroll"))
-		cursor = cursor_move;
-
-	if (cursor)
-		SDL_SetCursor(cursor);
+	//Deliberately empty - see the declaration. nch::RML_Cursor::tick() applies the cursor instead.
 }
 
 void SystemInterface_SDL::SetClipboardText(const Rml::String& text)

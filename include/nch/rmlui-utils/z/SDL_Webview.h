@@ -23,7 +23,7 @@ public:
     bool initContext();
     void destroyContext();
 
-    void tick(); void update();
+    void tick(bool alsoUpdate = true); void update();
     void render();
     void drawCopyAt(nch::Rect src, nch::Rect dst, double alpha = 1.0);
     void drawCopy(nch::Rect dst, double alpha = 1.0);
@@ -33,12 +33,14 @@ public:
 
     Rml::Context* getContext() const;
     Rml::ElementDocument* getWorkingDocument() const;
+    GLSDL_Texture* getRawWebTexture() const;
     nch::Vec2i getDims() const;
     nch::Rect getScreenBox() const;
     nch::Rect getViewBox() const;
     nch::Vec2i getScroll() const;
     nch::Vec2i getMaxScroll() const;
     bool hasForcedFocus() const;
+    bool isMouseDisabled() const;
 
     static void setLogging(bool shouldLog);
     void reload();

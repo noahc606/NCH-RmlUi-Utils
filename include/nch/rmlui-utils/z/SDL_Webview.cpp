@@ -15,6 +15,7 @@
 #include <sstream>
 #include "InputSlider.h"
 #include "InputTextareaEx.h"
+#include "RML_Cursor.h"
 #include "RmlUtils.h"
 
 
@@ -72,6 +73,7 @@ bool SDL_Webview::initContext(std::string p_rmlCtxID)
     GLSDL_GL_RestoreState(sdlRenderer);
     setScreenPos({0, 0});
     globalContextCount++;
+    RML_Cursor::trackWebview(this);
 
     return true;
 }
@@ -81,6 +83,7 @@ bool SDL_Webview::initContext()
 }
 void SDL_Webview::destroyContext()
 {
+    RML_Cursor::untrackWebview(this);
     if(rmlContext!=nullptr && workingDocument!=nullptr) {
         rmlContext->UnloadDocument(workingDocument);
         workingDocument = nullptr;
@@ -200,11 +203,10 @@ void SDL_Webview::rmlGlobalShutdown()
 }
 
 
-void SDL_Webview::tick()
+void SDL_Webview::tick(bool alsoUpdate)
 {
     if(rmlContext==nullptr) return;
-    /* Process resizes */
-    processResizes();
+    RML_Cursor::reportWebviewActivity(this);
 
     /* Mouse movement, clicking, and scrolling */
     Vec2i mousePos;
@@ -245,7 +247,9 @@ void SDL_Webview::tick()
                     injectScroll({0, mwd});
                 }                
             }
-
+        } else {
+            unfocusAll();
+            rmlContext->ProcessMouseMove(-9999, -9999, 0);
         }
     }
 
@@ -255,7 +259,7 @@ void SDL_Webview::tick()
     }
 
     /* Animated view box */
-    if(animatedScrolling) {
+    if(!animatedScrolling) {
         animViewBox = viewBox;
     } else {
         animViewBox.r.x = (viewBox.r.x+animViewBox.r.x)/2;
@@ -270,14 +274,15 @@ void SDL_Webview::tick()
     }
 
     //Update context
-	update();
+    if(alsoUpdate) update();
 
 	lastMousePos = mousePos;
 }
 void SDL_Webview::update()
 {
     if(rmlContext==nullptr) return;
-    
+    processResizes();
+
     /* Custom elements */
     Rml::ElementList elist;
     {
@@ -311,6 +316,7 @@ void SDL_Webview::render()
 void SDL_Webview::drawCopyAt(Rect src, Rect dst, double alpha)
 {
     if(rmlContext==nullptr) return;
+    RML_Cursor::reportWebviewActivity(this);
     truncateViewBox();
     if(!animatedScrolling) {
         animViewBox = viewBox;
@@ -580,6 +586,9 @@ Rml::Context* SDL_Webview::getContext() const {
 Rml::ElementDocument* SDL_Webview::getWorkingDocument() const {
     return workingDocument;
 }
+GLSDL_Texture* SDL_Webview::getRawWebTexture() const {
+    return webTex;
+}
 Vec2i SDL_Webview::getDims() const {
     return requestedDims;
 }
@@ -597,6 +606,9 @@ nch::Vec2i SDL_Webview::getMaxScroll() const {
 }
 bool SDL_Webview::hasForcedFocus() const {
     return forcedFocus;
+}
+bool SDL_Webview::isMouseDisabled() const {
+    return mouseDisabled;
 }
 
 void SDL_Webview::processResizes(bool forcedTexRecreation)

@@ -33,7 +33,6 @@ bool RmlUtils::elementHasAttribute(Rml::Element* elem, std::string attrName)
 {
     return elem->GetAttribute(attrName)!=nullptr;
 }
-
 std::tuple<int, int, std::string> RmlUtils::tryGetSelectedText(Rml::Element* elem)
 {
     int x = 0, y = 0;
@@ -45,10 +44,36 @@ std::tuple<int, int, std::string> RmlUtils::tryGetSelectedText(Rml::Element* ele
         textarea->GetSelection(&x, &y, &ret);
     }
     if((input = dynamic_cast<Rml::ElementFormControlInput*>(elem))) {
-        textarea->GetSelection(&x, &y, &ret);
+        input->GetSelection(&x, &y, &ret);
     }
 
     return {x, y, ret};
+}
+std::string RmlUtils::escapeSpecialChars(const std::string& raw) {
+    std::string out; out.reserve(raw.size());
+    for(char c : raw) {
+        switch(c) {
+            case '&':  out += "&amp;"; break;
+            case '<':  out += "&lt;"; break;
+            case '>':  out += "&gt;"; break;
+            case '"':  out += "&quot;"; break;
+            case '\'': out += "&#39;"; break;
+            default:   out += c;
+        }
+    }
+    return out;
+}
+
+std::string RmlUtils::unescapeSpecialChars(const std::string& rml) {
+    std::string ret = rml;
+    ret = StringUtils::replacedAllAWithB(ret, "&lt;", "<");
+    ret = StringUtils::replacedAllAWithB(ret, "&gt;", ">");
+    ret = StringUtils::replacedAllAWithB(ret, "&quot;", "\"");
+    ret = StringUtils::replacedAllAWithB(ret, "&#39;", "'");
+    //Last: an escaped ampersand is written "&amp;", so undoing it any earlier would turn a literal
+    //"&amp;lt;" back into a real "<" instead of the text "&lt;".
+    ret = StringUtils::replacedAllAWithB(ret, "&amp;", "&");
+    return ret;
 }
 
 void RmlUtils::setAttributes(Rml::ElementPtr& elem, const std::string& attrs)
@@ -108,20 +133,6 @@ void RmlUtils::appendChildRml(Rml::Element* eParent, const std::string& childRml
         setAttributes(elem, attributes);
         eParent->AppendChild(std::move(elem));
     }
-
-
-    /*
-
-    //Result
-    if(found) {
-        Rml::ElementPtr elem = doc->CreateElement(tagName);
-        elem->SetInnerRML(content);
-        setAttributes(std::move(elem), attributes);
-        eParent->AppendChild(std::move(elem));
-    } else {
-        throw std::logic_error("Provided 'rml' is not a valid RML element");
-    }
-    */
 }
 void RmlUtils::tryCopyPropertyFrom(Rml::Element* eSrc, Rml::Element* eDst, const std::string& propertyName)
 {

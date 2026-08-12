@@ -184,6 +184,7 @@ Rml::TextureHandle RenderInterface_SDL::LoadTexture(Rml::Vector2i& texture_dimen
     }
 
     GLSDL_Texture* texture = GLSDL_CreateTextureFromSurface(renderer, surface);
+
     texture_dimensions = Rml::Vector2i(surface->w, surface->h);
     DestroySurface(surface);
 
