@@ -35,7 +35,16 @@ public:
     Rml::ElementDocument* getWorkingDocument() const;
     GLSDL_Texture* getRawWebTexture() const;
     nch::Vec2i getDims() const;
+    //The webview's box in DOCUMENT pixels at its screen position - screen dims only when the screen
+    //scale is 1. getScreenRect() is the rectangle it actually occupies on screen.
     nch::Rect getScreenBox() const;
+    nch::Rect getScreenRect() const;
+    double getScreenScale() const;
+    /**
+     * @brief Convert a screen-space point into this webview's document space, undoing the screen
+     *        position and scale. Scrolling is NOT applied - add getScroll() where the caller wants it.
+     */
+    nch::Vec2i screenToDoc(nch::Vec2i screenPos) const;
     nch::Rect getViewBox() const;
     nch::Vec2i getScroll() const;
     nch::Vec2i getMaxScroll() const;
@@ -48,6 +57,11 @@ public:
     void setScreenPos(nch::Vec2i scrPos);
     void setScreenDims(nch::Vec2i scrDims);
     void setScreenBox(nch::Rect scrBox);
+    /**
+     * @brief Magnify the webview on screen: one document pixel is drawn as 'scrScale' screen pixels,
+     *        and mouse input is divided back down by it. 1 (the default) is pixel-for-pixel.
+     */
+    void setScreenScale(double scrScale);
     void setScrollDist(int scrollDist);
     void resetScrollbar();
     void setScroll(nch::Vec2i scroll);
@@ -88,6 +102,7 @@ private:
 
     nch::Vec2i lastMousePos = {-1, -1};
     nch::Rect screenBox = {-1,-1,-1,-1};
+    double screenScale = 1.0;
     nch::Rect viewBox = {0,0,-1,-1};
     nch::Rect animViewBox = {0, 0, -1, -1};
     bool animatedScrolling = false;

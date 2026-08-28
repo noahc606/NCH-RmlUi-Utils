@@ -17,8 +17,7 @@ void InputSlider::tick(SDL_Webview* sdlWebview, Rml::Element* e)
     std::string btnRootStyle = "display: block; position: relative;";
 
     //Get relative-to-webview mousePos
-    Vec2i mousePos = { Input::getMouseX(), Input::getMouseY() };
-    mousePos -= Vec2i(sdlWebview->getScreenBox().r.x, sdlWebview->getScreenBox().r.y);
+    Vec2i mousePos = sdlWebview->screenToDoc({ Input::getMouseX(), Input::getMouseY() });
     mousePos -= sdlWebview->getScroll();
 
     //Get slider properties

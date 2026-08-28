@@ -211,11 +211,12 @@ void SDL_Webview::tick(bool alsoUpdate)
     /* Mouse movement, clicking, and scrolling */
     Vec2i mousePos;
     if(forcedFocus) {
-        mousePos = { Input::getMouseX()-screenBox.r.x, Input::getMouseY()-screenBox.r.y+viewBox.r.y };
+        mousePos = screenToDoc({ Input::getMouseX(), Input::getMouseY() });
+        mousePos.y += viewBox.r.y;
         bool cancelMouse = false;
         if(mouseDisabled) cancelMouse = true;
         if(!cancelMouse) {
-            if(!screenBox.contains(Input::getMouseX(), Input::getMouseY())) {
+            if(!getScreenRect().contains(Input::getMouseX(), Input::getMouseY())) {
                 cancelMouse = true;
             }
         }
@@ -350,15 +351,15 @@ void SDL_Webview::drawCopy()
 {
     if(screenBox.r.h>dims.y) { screenBox.r.h = dims.y; }
     if(screenBox.r.w>dims.x) { screenBox.r.w = dims.x; }
-    drawCopyAt(animViewBox.r, screenBox.r);
+    drawCopyAt(animViewBox.r, getScreenRect());
 }
 void SDL_Webview::drawScrollbars()
 {
     if(rmlContext==nullptr) return;
 
-    Rect dst = screenBox;
-    if(dst.r.h>dims.y) { dst.r.h = dims.y; }
-    if(dst.r.w>dims.x) { dst.r.w = dims.x; }
+    Rect dst = getScreenRect();
+    if(dst.r.h>dims.y*screenScale) { dst.r.h = dims.y*screenScale; }
+    if(dst.r.w>dims.x*screenScale) { dst.r.w = dims.x*screenScale; }
 
     //Find 'sb0Dst' (scroll bar background)
     Rect sb0Dst = dst; {
@@ -522,6 +523,14 @@ void SDL_Webview::setScreenBox(Rect scrBox)
     viewBox.r.h = screenBox.r.h;
     truncateViewBox();
 }
+void SDL_Webview::setScreenScale(double scrScale)
+{
+    if(scrScale<=0) {
+        Log::warnv(__PRETTY_FUNCTION__, "doing nothing", "Screen scale must be positive (got %f)", scrScale);
+        return;
+    }
+    screenScale = scrScale;
+}
 void SDL_Webview::setScrollDist(int scrollDist) {
     SDL_Webview::scrollDist = scrollDist;
 }
@@ -594,6 +603,18 @@ Vec2i SDL_Webview::getDims() const {
 }
 Rect SDL_Webview::getScreenBox() const {
     return screenBox;
+}
+Rect SDL_Webview::getScreenRect() const {
+    return Rect(screenBox.r.x, screenBox.r.y, screenBox.r.w*screenScale, screenBox.r.h*screenScale);
+}
+double SDL_Webview::getScreenScale() const {
+    return screenScale;
+}
+nch::Vec2i SDL_Webview::screenToDoc(nch::Vec2i screenPos) const {
+    return {
+        (int)((screenPos.x-screenBox.r.x)/screenScale),
+        (int)((screenPos.y-screenBox.r.y)/screenScale)
+    };
 }
 nch::Rect SDL_Webview::getViewBox() const {
     return viewBox;

@@ -106,7 +106,7 @@ const RML_Cursor::Entry* RML_Cursor::findTopmostHovered(const Vec2i& mousePos)
     const Entry* ret = nullptr;
     for(const Entry& entry : webviews) {
         if(!takesMouseInput(entry)) continue;
-        if(!entry.wv->getScreenBox().contains(mousePos.x, mousePos.y)) continue;
+        if(!entry.wv->getScreenRect().contains(mousePos.x, mousePos.y)) continue;
         if(ret!=nullptr && entry.activitySeq<ret->activitySeq) continue;
 
         ret = &entry;
@@ -123,11 +123,10 @@ bool RML_Cursor::takesMouseInput(const Entry& entry)
 }
 Rml::Element* RML_Cursor::findHoveredElement(SDL_Webview* wv, const Vec2i& mousePos)
 {
-    Rect screenBox = wv->getScreenBox();
-    Rect viewBox = wv->getViewBox();
+    Vec2i docPos = wv->screenToDoc(mousePos);
     //Webview-local mouse position, mirroring SDL_Webview::tick()'s own mapping so the cursor always
     //describes the element a click would land on.
-    Rml::Vector2f localPos(mousePos.x-screenBox.r.x, mousePos.y-screenBox.r.y+viewBox.r.y);
+    Rml::Vector2f localPos(docPos.x, docPos.y+wv->getViewBox().r.y);
     return wv->getContext()->GetElementAtPoint(localPos);
 }
 void RML_Cursor::applyCursorNamed(const std::string& cursorName)
