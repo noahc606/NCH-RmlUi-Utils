@@ -1,6 +1,6 @@
 #include "RML_Cursor.h"
-#include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/Element.h>
 #include <nch/cpp-utils/log.h>
 #include <nch/cpp-utils/timer.h>
 #include <nch/sdl-utils/input.h>
@@ -68,7 +68,10 @@ void RML_Cursor::tick()
         applyCursorNamed("arrow");
         return;
     }
-    applyCursorNamed(hoveredElem->GetComputedValues().cursor());
+    //GetComputedValues().cursor()'s own body, inlined: ComputedValues isn't RMLUICORE_API, so a Windows RmlUi DLL never
+    //exports it and the link fails there.
+    const Rml::Property* cursorProp = hoveredElem->GetProperty(Rml::PropertyId::Cursor);
+    applyCursorNamed(cursorProp!=nullptr ? cursorProp->Get<Rml::String>() : "");
 }
 
 void RML_Cursor::trackWebview(SDL_Webview* wv)
