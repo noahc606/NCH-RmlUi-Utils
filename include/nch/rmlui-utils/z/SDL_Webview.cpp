@@ -95,9 +95,10 @@ void SDL_Webview::destroyContext()
 
     workingDocumentPath = "???null???";
     if(webTex!=nullptr) {
-        GLSDL_GL_SaveState(sdlRenderer);
+        bool wasSaveStated = GLSDL_GL_IsSaveStated();
+        if(!wasSaveStated) GLSDL_GL_SaveState(sdlRenderer);
         GLSDL_DestroyTexture(webTex);
-        GLSDL_GL_RestoreState(sdlRenderer);
+        if(!wasSaveStated) GLSDL_GL_RestoreState(sdlRenderer);
         webTex = nullptr;
     }
 }
